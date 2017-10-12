@@ -28,30 +28,19 @@ import pickle
 training_file = "data/train.p"
 validation_file="data/valid.p"
 testing_file = "data/test.p"
-
-augmented_file = 'data/augmentedTrain.p'
-if not os.path.isfile(augmented_file):
-    print("Loading ", training_file)
-    with open(training_file, mode='rb') as f:
-        train = pickle.load(f)
-else:
-    print("Loading ", augmented_file)
-    with open(augmented_file, mode='rb') as f:
-        train = pickle.load(f)
-        
+    
+with open(training_file, mode='rb') as f:
+    train = pickle.load(f)   
 with open(validation_file, mode='rb') as f:
     valid = pickle.load(f)
 with open(testing_file, mode='rb') as f:
     test = pickle.load(f)
-    
+
 X_train, y_train = train['features'], train['labels']
 X_valid, y_valid = valid['features'], valid['labels']
 X_test, y_test = test['features'], test['labels']
 
 ```
-
-    Loading  data/train.p
-    
 
 ---
 
@@ -103,27 +92,26 @@ Here i plot a grapth representing number of sample for each class, then i visual
 ```python
 ### Data exploration visualization code goes here.
 import matplotlib.pyplot as plt
+# Visualizations will be shown in the notebook.
+%matplotlib inline
+    
 
-if not os.path.isfile(augmented_file):
-    # Visualizations will be shown in the notebook.
-    %matplotlib inline
+fig, ax = plt.subplots()
+x,indexs,number_of_samples = np.unique(y_train,return_counts = True,return_index=True)
+ax.bar(x, number_of_samples, .5, color='r')
+ax.set_xlabel('Label')
+ax.set_ylabel('Number of samples per label')
 
-    fig, ax = plt.subplots()
-    x,indexs,number_of_samples = np.unique(y_train,return_counts = True,return_index=True)
-    ax.bar(x, number_of_samples, .5, color='r')
-    ax.set_xlabel('Label')
-    ax.set_ylabel('Number of samples per label')
+fig, axes = plt.subplots(5, 9, figsize=(12, 12),
+                         subplot_kw={'xticks': [], 'yticks': []})
 
-    fig, axes = plt.subplots(5, 9, figsize=(12, 12),
-                             subplot_kw={'xticks': [], 'yticks': []})
+fig.subplots_adjust(hspace=1, wspace=0.1)
 
-    fig.subplots_adjust(hspace=1, wspace=0.1)
+for ax, index in zip(axes.flat, indexs):
+    ax.imshow(X_train[index])
+    ax.set_title("label ({})".format(y_train[index]))
 
-    for ax, index in zip(axes.flat, indexs):
-        ax.imshow(X_train[index])
-        ax.set_title("label ({})".format(y_train[index]))
-
-    plt.show()
+plt.show()
 
 
 ```
@@ -166,7 +154,20 @@ def augment_image(image):
 
 
 ```python
-if not os.path.isfile(augmented_file): 
+augmented_file = 'data/augmentedTrain.p'
+
+augmented_samples = []
+labels_for_augmentation = []
+
+if os.path.isfile(augmented_file):
+    print("Augmented dataset found.")
+    with open(augmented_file, mode='rb') as f:
+        augmented_train = pickle.load(f)
+    print("Augmented dataset loaded.")
+    
+    augmented_samples, labels_for_augmentation = augmented_train['features'], augmented_train['labels']
+
+else: 
     # get the list of labels with number of samples less than 1000
     small_samples_indices = [i for i, samples_count in enumerate(number_of_samples) if samples_count < 1000]
 
@@ -185,22 +186,53 @@ if not os.path.isfile(augmented_file):
     for i in range(data_range):
         augmented_samples.append(augment_image(samples_for_augmentation[i]))
 
-    sample_index = np.random.randint(data_range)
-    plt.imshow(augmented_samples[sample_index])
-    plt.title("An Augmented Sample")
+sample_index = np.random.randint(len(augmented_samples))
+plt.imshow(augmented_samples[sample_index])
+plt.title("An Augmented Sample")
 ```
 
+    Augmented dataset found.
+    Augmented dataset loaded.
+    
 
-![png](output_11_0.png)
 
+
+
+    <matplotlib.text.Text at 0x1bbfbb651d0>
+
+
+
+
+![png](output_11_2.png)
+
+
+As my data augmentation stack is based on randomization.I'll save my new Dataset in a pickle file to load it later. To make sure that I train my model with the same dataset each time.
+
+
+```python
+# Save the data for easy access
+if not os.path.isfile(augmented_file):
+    print('Saving data to pickle file...')
+    try:
+        with open(augmented_file, 'wb') as pfile:
+            pickle.dump(
+                {
+                    'features': augmented_samples,
+                    'labels': labels_for_augmentation,
+                },
+                pfile, pickle.HIGHEST_PROTOCOL)
+    except Exception as e:
+        print('Unable to save data to', pickle_file, ':', e)
+        raise
+    print('Data cached in pickle file.')
+```
 
 Now as our Augmented samples are ready. I will add them to our training dataset
 
 
 ```python
-if not os.path.isfile(augmented_file):
-    X_train = np.concatenate((X_train,augmented_samples),axis=0)
-    y_train = np.concatenate((y_train,labels_for_augmentation),axis=0)
+X_train = np.concatenate((X_train,augmented_samples),axis=0)
+y_train = np.concatenate((y_train,labels_for_augmentation),axis=0)
 ```
 
 Let's now see some statestics on our new data set
@@ -217,38 +249,13 @@ ax.set_ylabel('Number of samples per label')
 
 
 
-    <matplotlib.text.Text at 0x253aea3f048>
+    <matplotlib.text.Text at 0x1bbfbb353c8>
 
 
 
 
-![png](output_15_1.png)
+![png](output_17_1.png)
 
-
-As my data augmentation stack is based on randomization.I'll save my new Dataset in a pickle file to load it later. To make sure that I train my model with the same dataset each time.
-
-
-```python
-# Save the data for easy access
-if not os.path.isfile(augmented_file):
-    print('Saving data to pickle file...')
-    try:
-        with open(augmented_file, 'wb') as pfile:
-            pickle.dump(
-                {
-                    'features': X_train,
-                    'labels': y_train,
-                },
-                pfile, pickle.HIGHEST_PROTOCOL)
-    except Exception as e:
-        print('Unable to save data to', pickle_file, ':', e)
-        raise
-    print('Data cached in pickle file.')
-```
-
-    Saving data to pickle file...
-    Data cached in pickle file.
-    
 
 ----
 
@@ -315,7 +322,7 @@ plt.imshow(original_image)
 
 
 
-    <matplotlib.image.AxesImage at 0x253af439208>
+    <matplotlib.image.AxesImage at 0x1bbfe42d7b8>
 
 
 
@@ -338,7 +345,7 @@ plt.imshow(gray_scaled_image,cmap='gray')
 
 
 
-    <matplotlib.image.AxesImage at 0x253b0476d30>
+    <matplotlib.image.AxesImage at 0x1bbfe4c9320>
 
 
 
@@ -361,7 +368,7 @@ plt.imshow(histogram_equalized_image,cmap='gray')
 
 
 
-    <matplotlib.image.AxesImage at 0x253aea2db38>
+    <matplotlib.image.AxesImage at 0x1bbee18ecf8>
 
 
 
@@ -420,10 +427,10 @@ My Model's architecture is LeNet Architecture as follows:
 | Flatten				| outputs 400									|
 | Fully connected		| Outputs  120									|
 | RELU					|												|
-| Dropout				|												|
+| Dropout				|		0.5										|
 | Fully connected		| Outputs  84									|
 | RELU					|												|
-| Dropout				|												|
+| Dropout				|		0.5										|
 | Fully connected		| Outputs  43									|
 
 
@@ -580,124 +587,124 @@ with tf.Session() as sess:
     Training...
     
     EPOCH 1 ...
-    Validation Accuracy = 0.590
+    Validation Accuracy = 0.558
     
     EPOCH 2 ...
-    Validation Accuracy = 0.745
+    Validation Accuracy = 0.712
     
     EPOCH 3 ...
-    Validation Accuracy = 0.795
+    Validation Accuracy = 0.789
     
     EPOCH 4 ...
-    Validation Accuracy = 0.827
+    Validation Accuracy = 0.823
     
     EPOCH 5 ...
-    Validation Accuracy = 0.853
+    Validation Accuracy = 0.854
     
     EPOCH 6 ...
-    Validation Accuracy = 0.863
+    Validation Accuracy = 0.870
     
     EPOCH 7 ...
-    Validation Accuracy = 0.882
+    Validation Accuracy = 0.884
     
     EPOCH 8 ...
-    Validation Accuracy = 0.898
+    Validation Accuracy = 0.881
     
     EPOCH 9 ...
-    Validation Accuracy = 0.901
+    Validation Accuracy = 0.914
     
     EPOCH 10 ...
-    Validation Accuracy = 0.912
-    
-    EPOCH 11 ...
-    Validation Accuracy = 0.916
-    
-    EPOCH 12 ...
-    Validation Accuracy = 0.919
-    
-    EPOCH 13 ...
     Validation Accuracy = 0.917
     
-    EPOCH 14 ...
-    Validation Accuracy = 0.937
+    EPOCH 11 ...
+    Validation Accuracy = 0.921
     
-    EPOCH 15 ...
-    Validation Accuracy = 0.930
-    
-    EPOCH 16 ...
-    Validation Accuracy = 0.927
-    
-    EPOCH 17 ...
+    EPOCH 12 ...
     Validation Accuracy = 0.926
     
+    EPOCH 13 ...
+    Validation Accuracy = 0.931
+    
+    EPOCH 14 ...
+    Validation Accuracy = 0.932
+    
+    EPOCH 15 ...
+    Validation Accuracy = 0.933
+    
+    EPOCH 16 ...
+    Validation Accuracy = 0.929
+    
+    EPOCH 17 ...
+    Validation Accuracy = 0.933
+    
     EPOCH 18 ...
-    Validation Accuracy = 0.924
+    Validation Accuracy = 0.933
     
     EPOCH 19 ...
-    Validation Accuracy = 0.935
+    Validation Accuracy = 0.941
     
     EPOCH 20 ...
-    Validation Accuracy = 0.936
+    Validation Accuracy = 0.944
     
     EPOCH 21 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.941
     
     EPOCH 22 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.943
     
     EPOCH 23 ...
     Validation Accuracy = 0.939
     
     EPOCH 24 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.941
     
     EPOCH 25 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.951
     
     EPOCH 26 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.940
     
     EPOCH 27 ...
     Validation Accuracy = 0.952
     
     EPOCH 28 ...
-    Validation Accuracy = 0.951
+    Validation Accuracy = 0.953
     
     EPOCH 29 ...
-    Validation Accuracy = 0.954
+    Validation Accuracy = 0.951
     
     EPOCH 30 ...
-    Validation Accuracy = 0.946
+    Validation Accuracy = 0.952
     
     EPOCH 31 ...
-    Validation Accuracy = 0.949
+    Validation Accuracy = 0.954
     
     EPOCH 32 ...
-    Validation Accuracy = 0.952
+    Validation Accuracy = 0.950
     
     EPOCH 33 ...
     Validation Accuracy = 0.955
     
     EPOCH 34 ...
-    Validation Accuracy = 0.959
+    Validation Accuracy = 0.950
     
     EPOCH 35 ...
-    Validation Accuracy = 0.954
+    Validation Accuracy = 0.957
     
     EPOCH 36 ...
-    Validation Accuracy = 0.951
+    Validation Accuracy = 0.953
     
     EPOCH 37 ...
-    Validation Accuracy = 0.959
-    
-    EPOCH 38 ...
     Validation Accuracy = 0.951
     
+    EPOCH 38 ...
+    Validation Accuracy = 0.956
+    
     EPOCH 39 ...
-    Validation Accuracy = 0.963
+    Validation Accuracy = 0.956
     
     EPOCH 40 ...
-    Validation Accuracy = 0.957
+    Validation Accuracy = 0.956
     
     Model saved
     
@@ -716,7 +723,7 @@ with tf.Session() as sess:
 ```
 
     INFO:tensorflow:Restoring parameters from .\lenet
-    Test Accuracy = 0.926
+    Test Accuracy = 0.927
     
 
 ---
@@ -841,43 +848,43 @@ for i in range(5):
         print("\n\t{} : {}".format(top5_predictions[1][i][j],sign_names_dict[str(top5_predictions[1][i][j])]))
 ```
 
-    TopKV2(values=array([[ 15.89681911,   3.26698732,   2.19370675,  -1.39770448,
-             -2.52430511],
-           [  1.08917642,   0.09917483,  -0.08225614,  -0.36001211,  -0.3770729 ],
-           [ 20.27925301,  13.74192619,   7.26025438,   5.78252125,
-              3.65648985],
-           [ 18.05321884,  10.17467117,   9.63263226,   6.05646133,
-              5.48789978],
-           [ 13.47514534,  12.9828043 ,   9.86765003,   6.07638073,
-              4.77030754]], dtype=float32), indices=array([[12, 42, 41, 40, 13],
-           [28, 24, 30, 29, 31],
+    TopKV2(values=array([[ 12.89226055,   0.72130269,   0.70192468,   0.36128438,  -1.0236696 ],
+           [  6.87426424,   6.70423603,   5.91363287,   5.59571838,
+              2.30624247],
+           [ 18.35824776,  11.32564259,   8.6455946 ,   6.74103069,
+              6.34380388],
+           [ 19.32876205,   7.81982946,   3.49760365,  -0.66554284,
+             -0.87531102],
+           [ 19.55654144,  14.33337688,   8.32946587,   2.72612834,
+             -0.84658486]], dtype=float32), indices=array([[12, 41, 39,  9, 33],
+           [21, 31, 23, 19, 29],
            [31, 21, 23, 19, 29],
-           [ 4,  7,  8,  1, 39],
-           [ 9, 13, 10, 42, 41]]))
+           [ 4, 15, 14, 39,  5],
+           [ 9, 41, 17, 16, 42]]))
     
     Top 5 predections for image 0 are :
     
     	12 : Priority road
     
-    	42 : End of no passing by vehicles over 3.5 metric tons
-    
     	41 : End of no passing
     
-    	40 : Roundabout mandatory
+    	39 : Keep left
     
-    	13 : Yield
+    	9 : No passing
+    
+    	33 : Turn right ahead
     
     Top 5 predections for image 1 are :
     
-    	28 : Children crossing
-    
-    	24 : Road narrows on the right
-    
-    	30 : Beware of ice/snow
-    
-    	29 : Bicycles crossing
+    	21 : Double curve
     
     	31 : Wild animals crossing
+    
+    	23 : Slippery road
+    
+    	19 : Dangerous curve to the left
+    
+    	29 : Bicycles crossing
     
     Top 5 predections for image 2 are :
     
@@ -895,26 +902,28 @@ for i in range(5):
     
     	4 : Speed limit (70km/h)
     
-    	7 : Speed limit (100km/h)
+    	15 : No vehicles
     
-    	8 : Speed limit (120km/h)
-    
-    	1 : Speed limit (30km/h)
+    	14 : Stop
     
     	39 : Keep left
+    
+    	5 : Speed limit (80km/h)
     
     Top 5 predections for image 4 are :
     
     	9 : No passing
     
-    	13 : Yield
+    	41 : End of no passing
     
-    	10 : No passing for vehicles over 3.5 metric tons
+    	17 : No entry
+    
+    	16 : Vehicles over 3.5 metric tons prohibited
     
     	42 : End of no passing by vehicles over 3.5 metric tons
     
-    	41 : End of no passing
-    
+
+It's clear from image 1 that the model need to be trained on more samples from class "Speed limit (30km/h)"
 
 ---
 
@@ -979,3 +988,8 @@ outputFeatureMap(images[0],conv2)
 
 ![png](output_68_1.png)
 
+
+
+```python
+
+```
