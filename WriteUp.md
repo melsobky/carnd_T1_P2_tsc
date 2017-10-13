@@ -198,7 +198,7 @@ plt.title("An Augmented Sample")
 
 
 
-    <matplotlib.text.Text at 0x1bbfbb651d0>
+    <matplotlib.text.Text at 0x1be39bb5160>
 
 
 
@@ -249,7 +249,7 @@ ax.set_ylabel('Number of samples per label')
 
 
 
-    <matplotlib.text.Text at 0x1bbfbb353c8>
+    <matplotlib.text.Text at 0x1be3c0b1f60>
 
 
 
@@ -322,7 +322,7 @@ plt.imshow(original_image)
 
 
 
-    <matplotlib.image.AxesImage at 0x1bbfe42d7b8>
+    <matplotlib.image.AxesImage at 0x1be3d7ee748>
 
 
 
@@ -345,7 +345,7 @@ plt.imshow(gray_scaled_image,cmap='gray')
 
 
 
-    <matplotlib.image.AxesImage at 0x1bbfe4c9320>
+    <matplotlib.image.AxesImage at 0x1be3d85a198>
 
 
 
@@ -368,7 +368,7 @@ plt.imshow(histogram_equalized_image,cmap='gray')
 
 
 
-    <matplotlib.image.AxesImage at 0x1bbee18ecf8>
+    <matplotlib.image.AxesImage at 0x1be2c225390>
 
 
 
@@ -587,124 +587,124 @@ with tf.Session() as sess:
     Training...
     
     EPOCH 1 ...
-    Validation Accuracy = 0.558
+    Validation Accuracy = 0.503
     
     EPOCH 2 ...
-    Validation Accuracy = 0.712
+    Validation Accuracy = 0.711
     
     EPOCH 3 ...
-    Validation Accuracy = 0.789
+    Validation Accuracy = 0.760
     
     EPOCH 4 ...
-    Validation Accuracy = 0.823
+    Validation Accuracy = 0.811
     
     EPOCH 5 ...
-    Validation Accuracy = 0.854
+    Validation Accuracy = 0.830
     
     EPOCH 6 ...
-    Validation Accuracy = 0.870
+    Validation Accuracy = 0.847
     
     EPOCH 7 ...
-    Validation Accuracy = 0.884
+    Validation Accuracy = 0.851
     
     EPOCH 8 ...
-    Validation Accuracy = 0.881
+    Validation Accuracy = 0.868
     
     EPOCH 9 ...
-    Validation Accuracy = 0.914
+    Validation Accuracy = 0.890
     
     EPOCH 10 ...
-    Validation Accuracy = 0.917
+    Validation Accuracy = 0.894
     
     EPOCH 11 ...
-    Validation Accuracy = 0.921
+    Validation Accuracy = 0.899
     
     EPOCH 12 ...
-    Validation Accuracy = 0.926
+    Validation Accuracy = 0.906
     
     EPOCH 13 ...
-    Validation Accuracy = 0.931
+    Validation Accuracy = 0.907
     
     EPOCH 14 ...
-    Validation Accuracy = 0.932
+    Validation Accuracy = 0.913
     
     EPOCH 15 ...
-    Validation Accuracy = 0.933
+    Validation Accuracy = 0.923
     
     EPOCH 16 ...
-    Validation Accuracy = 0.929
+    Validation Accuracy = 0.915
     
     EPOCH 17 ...
-    Validation Accuracy = 0.933
+    Validation Accuracy = 0.922
     
     EPOCH 18 ...
-    Validation Accuracy = 0.933
+    Validation Accuracy = 0.924
     
     EPOCH 19 ...
-    Validation Accuracy = 0.941
+    Validation Accuracy = 0.927
     
     EPOCH 20 ...
-    Validation Accuracy = 0.944
+    Validation Accuracy = 0.925
     
     EPOCH 21 ...
-    Validation Accuracy = 0.941
+    Validation Accuracy = 0.930
     
     EPOCH 22 ...
-    Validation Accuracy = 0.943
+    Validation Accuracy = 0.936
     
     EPOCH 23 ...
     Validation Accuracy = 0.939
     
     EPOCH 24 ...
-    Validation Accuracy = 0.941
+    Validation Accuracy = 0.933
     
     EPOCH 25 ...
-    Validation Accuracy = 0.951
+    Validation Accuracy = 0.935
     
     EPOCH 26 ...
-    Validation Accuracy = 0.940
+    Validation Accuracy = 0.931
     
     EPOCH 27 ...
-    Validation Accuracy = 0.952
+    Validation Accuracy = 0.944
     
     EPOCH 28 ...
-    Validation Accuracy = 0.953
+    Validation Accuracy = 0.938
     
     EPOCH 29 ...
-    Validation Accuracy = 0.951
+    Validation Accuracy = 0.931
     
     EPOCH 30 ...
-    Validation Accuracy = 0.952
+    Validation Accuracy = 0.942
     
     EPOCH 31 ...
-    Validation Accuracy = 0.954
+    Validation Accuracy = 0.944
     
     EPOCH 32 ...
-    Validation Accuracy = 0.950
+    Validation Accuracy = 0.939
     
     EPOCH 33 ...
-    Validation Accuracy = 0.955
+    Validation Accuracy = 0.941
     
     EPOCH 34 ...
-    Validation Accuracy = 0.950
+    Validation Accuracy = 0.944
     
     EPOCH 35 ...
-    Validation Accuracy = 0.957
+    Validation Accuracy = 0.942
     
     EPOCH 36 ...
-    Validation Accuracy = 0.953
+    Validation Accuracy = 0.944
     
     EPOCH 37 ...
-    Validation Accuracy = 0.951
+    Validation Accuracy = 0.948
     
     EPOCH 38 ...
-    Validation Accuracy = 0.956
+    Validation Accuracy = 0.936
     
     EPOCH 39 ...
-    Validation Accuracy = 0.956
+    Validation Accuracy = 0.947
     
     EPOCH 40 ...
-    Validation Accuracy = 0.956
+    Validation Accuracy = 0.942
     
     Model saved
     
@@ -723,7 +723,7 @@ with tf.Session() as sess:
 ```
 
     INFO:tensorflow:Restoring parameters from .\lenet
-    Test Accuracy = 0.927
+    Test Accuracy = 0.919
     
 
 ---
@@ -757,14 +757,48 @@ files = [f for f in listdir('images/') if isfile(join('images/', f))]
 images = []
 labels = []
 for file in files:
-    image = cv2.imread(join('images/', file),-1)
+    image = cv2.imread(join('images/', file))
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     label = file.split('_')[0]
     images.append(image)
     labels.append(label)
+    
+```
+
+
+```python
+fig, axes = plt.subplots(1, 5, figsize=(20, 20),
+                         subplot_kw={'xticks': [], 'yticks': []})
+
+fig.subplots_adjust(hspace=2, wspace=0.1)
+
+for ax, image,label in zip(axes.flat, images,labels):
+    ax.imshow(image)
+    ax.set_title("label ({})".format(sign_names_dict[label]))
+```
+
+
+![png](output_56_0.png)
+
+
+I've selected these images for the following properties:
+
+**Priority road : ** The sign is not front facing
+
+**Speed limit (30km/h) : ** the color of the bounding circle is not clear and mixes with some background colors
+
+**Speed limit (30km/h) : ** The image is blured
+
+**No passing : ** The sign is cropped
+
+Now Let's apply our preprocessing steps to the images
+
+
+```python
 images = preprocess_data(images)
 ```
 
-Now let's visualize the data
+Now let's visualize the images after preprocessing
 
 
 ```python
@@ -780,7 +814,7 @@ for ax, image,label in zip(axes.flat, images,labels):
 ```
 
 
-![png](output_57_0.png)
+![png](output_60_0.png)
 
 
 ### Predict the Sign Type for Each Image
@@ -793,7 +827,7 @@ def getPrediction(X_data):
         saver.restore(sess, tf.train.latest_checkpoint('.'))
         batch_x = np.expand_dims(X_data, axis=3)
         predictions = sess.run(logits, feed_dict={x: batch_x, keep_prob : 1})
-        top5_predictions = sess.run(tf.nn.top_k(predictions, k=5))
+        top5_predictions = sess.run(tf.nn.top_k(tf.nn.softmax(logits), k=5), feed_dict = {x: batch_x, keep_prob : 1})
         predictions = sess.run(tf.argmax(predictions, 1))
     return predictions,top5_predictions
 
@@ -814,7 +848,7 @@ for ax, image,label in zip(axes.flat, images,predictions):
     
 
 
-![png](output_59_1.png)
+![png](output_62_1.png)
 
 
 ### Analyze Performance
@@ -833,6 +867,9 @@ with tf.Session() as sess:
     Test Accuracy = 0.800
     
 
+The model was able to classify **80%** of the new images while the detection accuracy on the test set was **91.9%**.
+The difference in the results is comparable taking into account the number of data samples used at each evaluation.
+
 ### Output Top 5 Softmax Probabilities For Each Image Found on the Web
 
 For each of the new images, we print out the model's softmax probabilities to show the **certainty** of the model's predictions
@@ -843,85 +880,48 @@ For each of the new images, we print out the model's softmax probabilities to sh
 print(top5_predictions)
 
 for i in range(5):
-    print("\nTop 5 predections for image {} are :".format(i))
-    for j in range(5):
-        print("\n\t{} : {}".format(top5_predictions[1][i][j],sign_names_dict[str(top5_predictions[1][i][j])]))
+    fig, ax = plt.subplots()
+    ax.bar(top5_predictions[1][i],top5_predictions[0][i], .5, color='b')
+    ax.set_xlabel('Classification')
+    ax.set_ylabel('Softmax Probabilities')
+    ax.set_title("Image [{}]".format(i))
 ```
 
-    TopKV2(values=array([[ 12.89226055,   0.72130269,   0.70192468,   0.36128438,  -1.0236696 ],
-           [  6.87426424,   6.70423603,   5.91363287,   5.59571838,
-              2.30624247],
-           [ 18.35824776,  11.32564259,   8.6455946 ,   6.74103069,
-              6.34380388],
-           [ 19.32876205,   7.81982946,   3.49760365,  -0.66554284,
-             -0.87531102],
-           [ 19.55654144,  14.33337688,   8.32946587,   2.72612834,
-             -0.84658486]], dtype=float32), indices=array([[12, 41, 39,  9, 33],
-           [21, 31, 23, 19, 29],
-           [31, 21, 23, 19, 29],
-           [ 4, 15, 14, 39,  5],
-           [ 9, 41, 17, 16, 42]]))
+    TopKV2(values=array([[  9.99997854e-01,   1.07002575e-06,   7.87906288e-07,
+              2.36955088e-07,   2.14254605e-08],
+           [  1.96261629e-01,   1.92664117e-01,   1.60920650e-01,
+              1.43577904e-01,   1.08913928e-01],
+           [  9.99427080e-01,   5.72201388e-04,   2.54011269e-07,
+              2.08046416e-07,   1.47845313e-07],
+           [  9.99999404e-01,   6.34871810e-07,   1.12973719e-09,
+              3.79422022e-10,   1.10463756e-11],
+           [  9.95507002e-01,   4.44019539e-03,   5.18351990e-05,
+              4.82785481e-07,   4.26894928e-07]], dtype=float32), indices=array([[12, 40, 11, 42,  1],
+           [31, 23, 19, 21, 10],
+           [31, 21, 23, 19, 22],
+           [ 4,  1,  2, 15,  0],
+           [ 9, 13, 10,  3, 12]]))
     
-    Top 5 predections for image 0 are :
-    
-    	12 : Priority road
-    
-    	41 : End of no passing
-    
-    	39 : Keep left
-    
-    	9 : No passing
-    
-    	33 : Turn right ahead
-    
-    Top 5 predections for image 1 are :
-    
-    	21 : Double curve
-    
-    	31 : Wild animals crossing
-    
-    	23 : Slippery road
-    
-    	19 : Dangerous curve to the left
-    
-    	29 : Bicycles crossing
-    
-    Top 5 predections for image 2 are :
-    
-    	31 : Wild animals crossing
-    
-    	21 : Double curve
-    
-    	23 : Slippery road
-    
-    	19 : Dangerous curve to the left
-    
-    	29 : Bicycles crossing
-    
-    Top 5 predections for image 3 are :
-    
-    	4 : Speed limit (70km/h)
-    
-    	15 : No vehicles
-    
-    	14 : Stop
-    
-    	39 : Keep left
-    
-    	5 : Speed limit (80km/h)
-    
-    Top 5 predections for image 4 are :
-    
-    	9 : No passing
-    
-    	41 : End of no passing
-    
-    	17 : No entry
-    
-    	16 : Vehicles over 3.5 metric tons prohibited
-    
-    	42 : End of no passing by vehicles over 3.5 metric tons
-    
+
+
+![png](output_68_1.png)
+
+
+
+![png](output_68_2.png)
+
+
+
+![png](output_68_3.png)
+
+
+
+![png](output_68_4.png)
+
+
+
+![png](output_68_5.png)
+
 
 It's clear from image 1 that the model need to be trained on more samples from class "Speed limit (30km/h)"
 
@@ -974,7 +974,7 @@ outputFeatureMap(images[0],conv1)
     
 
 
-![png](output_67_1.png)
+![png](output_71_1.png)
 
 
 
@@ -986,7 +986,7 @@ outputFeatureMap(images[0],conv2)
     
 
 
-![png](output_68_1.png)
+![png](output_72_1.png)
 
 
 
